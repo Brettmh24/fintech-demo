@@ -14,7 +14,7 @@ Classification     : Internal Use Only
 This document describes the methodology, data sources, findings, and limitations
 of an exploratory analysis examining the relationship between credit card
 delinquency rates and the unemployment rate over a ten-year period
-(2016-04-25 to 2026-04-23).
+(2008-01-01 to 2026-04-23).
 
 The analysis is intended to support the bank's credit risk monitoring function
 by identifying historical periods of elevated consumer credit stress and their
@@ -48,7 +48,7 @@ adjustments or overrides were applied to the raw data.
 --------------------------------------------------------------------------------
 Step 1 — Data Retrieval
   Both series were pulled via the FRED REST API for the period
-  2016-04-25 to 2026-04-23.
+  2008-01-01 to 2026-04-23.
 
 Step 2 — Frequency Alignment
   UNRATE (monthly) was resampled to quarterly frequency by computing the
@@ -78,21 +78,21 @@ three pronounced upward spikes. In each case, the spike coincided with or
 immediately followed periods of labor market deterioration, consistent with
 the well-documented relationship between unemployment and consumer credit stress.
 
-  Spike 1: April 2023
+  Spike 1: January 2009
+  - Delinquency Rate : 6.51%
+  - Quarter-on-Quarter Change : +0.87 percentage points
+  - Concurrent Unemployment Rate : 8.27%
+  - Economic Context : Global Financial Crisis peak; widespread unemployment and tightening credit conditions drove delinquency to record highs.
+
+  Spike 2: October 2008
+  - Delinquency Rate : 5.64%
+  - Quarter-on-Quarter Change : +0.84 percentage points
+  - Concurrent Unemployment Rate : 6.87%
+  - Economic Context : Global Financial Crisis peak; widespread unemployment and tightening credit conditions drove delinquency to record highs.
+
+  Spike 3: April 2023
   - Delinquency Rate : 2.75%
   - Quarter-on-Quarter Change : +0.28 percentage points
-  - Concurrent Unemployment Rate : 3.53%
-  - Economic Context : Post-pandemic credit normalization; stimulus exhaustion and rising interest rates increased delinquency pressure.
-
-  Spike 2: July 2022
-  - Delinquency Rate : 2.05%
-  - Quarter-on-Quarter Change : +0.22 percentage points
-  - Concurrent Unemployment Rate : 3.53%
-  - Economic Context : Post-pandemic credit normalization; stimulus exhaustion and rising interest rates increased delinquency pressure.
-
-  Spike 3: January 2023
-  - Delinquency Rate : 2.47%
-  - Quarter-on-Quarter Change : +0.21 percentage points
   - Concurrent Unemployment Rate : 3.53%
   - Economic Context : Post-pandemic credit normalization; stimulus exhaustion and rising interest rates increased delinquency pressure.
 

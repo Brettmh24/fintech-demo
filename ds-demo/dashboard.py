@@ -59,13 +59,38 @@ st.markdown("""
     .header-strip h2 { color: white; margin: 0; font-size: 1.1rem; font-weight: 400; }
     .header-strip h1 { color: white; margin: 0; font-size: 1.8rem; font-weight: 700; }
 
-    /* Compliance doc */
-    .compliance-doc {
-        font-family: 'Courier New', monospace;
-        font-size: 0.72rem;
-        line-height: 1.6;
-        white-space: pre-wrap;
-        color: #c9d4e0;
+    /* Compliance doc sections */
+    .compliance-section-header {
+        color: #ffffff !important;
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 1.2rem !important;
+        margin-bottom: 0.3rem !important;
+        border-bottom: 1px solid #2a3f55;
+        padding-bottom: 0.2rem;
+    }
+    .compliance-meta {
+        font-size: 0.82rem;
+        color: #8fa8c0 !important;
+        line-height: 1.7;
+    }
+    .compliance-body {
+        font-size: 0.82rem;
+        color: #c9d4e0 !important;
+        line-height: 1.75;
+        margin-bottom: 0.5rem;
+    }
+    .compliance-spike {
+        background-color: #162030;
+        border-left: 3px solid #1a56db;
+        padding: 0.5rem 0.75rem;
+        margin: 0.5rem 0;
+        border-radius: 0 4px 4px 0;
+        font-size: 0.8rem;
+        color: #c9d4e0 !important;
+        line-height: 1.7;
     }
 
     /* Divider */
@@ -86,6 +111,17 @@ def load_data():
         compliance = f.read()
     return df, spikes, compliance
 
+def parse_compliance_sections(text: str) -> dict:
+    """Parse the flat compliance text into a dict of section_title -> body."""
+    import re
+    sections = {}
+    parts = re.split(r"-{40,}\n(\d+\.\s+[A-Z &]+)\n-{40,}", text)
+    # parts[0] is the header block; then alternating title/body
+    sections["__header__"] = parts[0]
+    for i in range(1, len(parts) - 1, 2):
+        sections[parts[i].strip()] = parts[i + 1].strip()
+    return sections
+
 try:
     df, spikes, compliance_text = load_data()
 except FileNotFoundError:
@@ -95,14 +131,50 @@ except FileNotFoundError:
     st.stop()
 
 # -----------------------------------------------------------------------------
-# SIDEBAR — Compliance Documentation
+# SIDEBAR — Compliance Documentation (structured, readable sections)
 # -----------------------------------------------------------------------------
 with st.sidebar:
     st.markdown("### 🏦 Credit Risk Intelligence")
-    st.markdown("**Internal Use Only** — Model Risk Management")
+    st.markdown('<p class="compliance-meta"><b>Internal Use Only</b> — Model Risk Management</p>', unsafe_allow_html=True)
     st.markdown("---")
-    st.markdown("#### Compliance Documentation")
-    st.markdown(f'<div class="compliance-doc">{compliance_text}</div>', unsafe_allow_html=True)
+
+    sections = parse_compliance_sections(compliance_text)
+
+    # Document metadata block
+    header_lines = [l.strip() for l in sections.get("__header__", "").splitlines() if ":" in l and not l.startswith("=")]
+    if header_lines:
+        meta_html = "".join(f'<div class="compliance-meta">{l}</div>' for l in header_lines)
+        st.markdown(meta_html, unsafe_allow_html=True)
+
+    section_labels = {
+        "1. PURPOSE OF ANALYSIS":    "1. Purpose of Analysis",
+        "2. DATA SOURCES":           "2. Data Sources",
+        "3. METHODOLOGY":            "3. Methodology",
+        "4. FINDINGS SUMMARY":       "4. Findings Summary",
+        "5. LIMITATIONS AND CAVEATS":"5. Limitations & Caveats",
+        "6. RECOMMENDED NEXT STEPS": "6. Recommended Next Steps",
+    }
+
+    for key, label in section_labels.items():
+        body = sections.get(key, "")
+        if not body:
+            continue
+        st.markdown(f'<p class="compliance-section-header">{label}</p>', unsafe_allow_html=True)
+
+        # Findings section — render each spike as a highlighted card
+        if key == "4. FINDINGS SUMMARY":
+            import re
+            intro, *spike_parts = re.split(r"(Spike \d+:)", body)
+            st.markdown(f'<div class="compliance-body">{intro.strip()}</div>', unsafe_allow_html=True)
+            it = iter(spike_parts)
+            for spike_label in it:
+                spike_body = next(it, "")
+                st.markdown(
+                    f'<div class="compliance-spike"><b>{spike_label}</b>{spike_body}</div>',
+                    unsafe_allow_html=True,
+                )
+        else:
+            st.markdown(f'<div class="compliance-body">{body}</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # MAIN HEADER
@@ -131,7 +203,7 @@ st.markdown("---")
 # -----------------------------------------------------------------------------
 # CHART 1 — Delinquency Rate with Spike Annotations
 # -----------------------------------------------------------------------------
-st.markdown("#### Credit Card Delinquency Rate — 10-Year Trend with Key Stress Events")
+st.markdown("#### Credit Card Delinquency Rate — Historical Trend with Key Stress Events")
 
 fig1 = go.Figure()
 

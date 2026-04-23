@@ -28,7 +28,7 @@ OUTPUT_DIR    = os.path.join(os.path.dirname(__file__), "outputs")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 END_DATE   = datetime.today().strftime("%Y-%m-%d")
-START_DATE = (datetime.today() - timedelta(days=365 * 10)).strftime("%Y-%m-%d")
+START_DATE = "2008-01-01"  # Extended to capture 2008 financial crisis and 2020 COVID spike
 
 # -----------------------------------------------------------------------------
 # DATA SERIES
@@ -42,9 +42,9 @@ SERIES = {
 
 # Economic context for annotating known spike periods — used in compliance doc
 ECONOMIC_CONTEXT = {
+    "2009-04-01": "Global Financial Crisis peak; widespread unemployment and tightening credit conditions drove delinquency to record highs.",
     "2020-04-01": "COVID-19 pandemic onset; mass layoffs and economic shutdown triggered a sharp rise in consumer financial stress.",
-    "2023-07-01": "Post-pandemic credit normalization; stimulus exhaustion and rising interest rates increased delinquency pressure.",
-    "2019-01-01": "Late-cycle credit stress; rising household debt levels and tightening lending standards elevated delinquency rates.",
+    "2023-04-01": "Post-pandemic credit normalization; stimulus exhaustion and rising interest rates increased delinquency pressure.",
 }
 
 
