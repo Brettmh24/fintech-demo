@@ -145,18 +145,19 @@ fig1.add_trace(go.Scatter(
     fillcolor="rgba(26, 86, 219, 0.08)",
 ))
 
-# Spike markers and labels
-# Alternate label positions so clustered spikes don't overlap
-colors         = ["#e3342f", "#f6993f", "#d4a017"]
-text_positions = ["top right", "bottom right", "top left"]
+# Spike markers and labels — fixed offsets per spike to avoid overlap
+colors = ["#e3342f", "#f6993f", "#d4a017"]
+# ax/ay = arrow direction (pixels), each spike pushed to a distinct position
+offsets = [
+    dict(ax=80,  ay=-80),   # Spike 1: upper right
+    dict(ax=-80, ay=60),    # Spike 2: lower left
+    dict(ax=80,  ay=60),    # Spike 3: lower right
+]
 
 for i, row in spikes.iterrows():
     spike_date = pd.Timestamp(row["date"])
     spike_val  = row["rate"]
     label      = spike_date.strftime("%b '%y")
-
-    # Vertical offset — push alternating labels above/below the marker
-    y_offset = spike_val + (0.12 if i % 2 == 0 else -0.18)
 
     fig1.add_trace(go.Scatter(
         x=[spike_date],
@@ -167,18 +168,17 @@ for i, row in spikes.iterrows():
         showlegend=True,
     ))
 
-    # Separate annotation so we can position each label independently
     fig1.add_annotation(
         x=spike_date,
-        y=y_offset,
+        y=spike_val,
         text=f"<b>Spike {i+1}</b><br>{label}<br>{spike_val:.2f}%",
         showarrow=True,
         arrowhead=2,
         arrowsize=1,
         arrowcolor=colors[i],
         arrowwidth=1.5,
-        ax=40 if i % 2 == 0 else -60,
-        ay=-30 if i % 2 == 0 else 30,
+        ax=offsets[i]["ax"],
+        ay=offsets[i]["ay"],
         font=dict(size=11, color=colors[i]),
         bgcolor="white",
         bordercolor=colors[i],
