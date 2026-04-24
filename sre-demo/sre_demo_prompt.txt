@@ -1,0 +1,74 @@
+You are a senior Site Reliability Engineer at a financial services company.
+You have just been handed the raw incident log for INC-2025-1114-001, a SEV-1
+outage that affected the Payment Authorization Gateway on the night of
+November 14, 2025.
+
+Your task is to produce three deliverables from that log:
+
+================================================================================
+DELIVERABLE 1 — POST-INCIDENT REVIEW (PIR) DOCUMENT
+================================================================================
+
+Write a formal PIR suitable for distribution to engineering leadership and the
+Risk & Compliance team. Structure it as follows:
+
+  1. Executive Summary (3–5 sentences, non-technical, suitable for a VP audience)
+  2. Timeline (condensed — key decision points only, not every log line)
+  3. Root Cause (single precise statement of what went wrong and why)
+  4. Contributing Factors (bulleted, ranked by impact)
+  5. Customer & Business Impact (quantified where the log provides numbers)
+  6. What Went Well (things that limited blast radius or accelerated recovery)
+  7. Corrective Actions (table: action | owner | due date | status)
+  8. Lessons Learned (2–3 transferable insights for the broader engineering org)
+
+Tone: factual, blameless, professional.
+
+================================================================================
+DELIVERABLE 2 — RUNBOOK: PAG Connection Pool Exhaustion (DB Lock Contention)
+================================================================================
+
+Write the missing runbook that would have accelerated diagnosis during this
+incident. Format it for a Confluence-style internal wiki page.
+
+Include:
+  - Symptom signatures (what alerts fire, what Grafana panels to check first)
+  - Diagnostic steps (numbered, in the order an on-call engineer should follow)
+  - Exact commands to run at each diagnostic step (psql, kubectl, AWS CLI, etc.)
+  - Decision tree: escalate vs. self-resolve, with criteria
+  - Mitigation steps (immediate actions to restore service)
+  - Rollback / undo instructions where applicable
+  - Links section (placeholder format: [Grafana Dashboard], [RDS Console], etc.)
+
+The runbook should be completable by an on-call SRE who has never seen this
+failure mode before.
+
+================================================================================
+DELIVERABLE 3 — CODE REVIEW: audit-reconciler-v2 Remediation
+================================================================================
+
+The problematic batch job runs a query equivalent to:
+
+    UPDATE transaction_audit
+    SET reconciled = TRUE
+    WHERE created_at < '2025-11-01';
+
+Rewrite this as a Python function that:
+  - Processes rows in chunks of 10,000 to avoid long-held locks
+  - Accepts the cutoff date and chunk size as parameters
+  - Logs progress (rows updated, elapsed time per chunk)
+  - Includes a configurable inter-chunk sleep to reduce DB pressure
+  - Handles exceptions without leaving partial batches in an ambiguous state
+  - Is safe to re-run (idempotent)
+
+Use psycopg2 for the DB connection. Include type hints. Do not use an ORM.
+After the function, add a brief code review comment (3–5 sentences) explaining
+why the original single-statement UPDATE was dangerous at production scale and
+what the chunked approach trades off in exchange for safety.
+
+================================================================================
+INCIDENT LOG FILE
+================================================================================
+
+Read the file: sre-demo/incident_log_nov14_2347.txt
+
+Produce all three deliverables in a single response, separated by clear headers.
